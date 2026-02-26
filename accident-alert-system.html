@@ -934,12 +934,20 @@
             } else {
                 stopMonitoring();
             }
+            clearInterval(alarmInterval);
+                if (audioContext) {
+                audioContext.close();
+            }
 
             showToast('Alert cancelled', 'success');
         }
 
         // Trigger Emergency
         function triggerEmergency() {
+            clearInterval(alarmInterval);
+                if (audioContext) {
+                    audioContext.close();
+                }
             document.getElementById('countdownModal').classList.remove('active');
 
             navigator.geolocation.getCurrentPosition(
