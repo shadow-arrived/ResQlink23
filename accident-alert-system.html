@@ -899,55 +899,68 @@
 
         // Show Countdown
         function showCountdown() {
-            const modal = document.getElementById('countdownModal');
-            modal.classList.add('active');
+    const modal = document.getElementById('countdownModal');
+    modal.classList.add('active');
 
-            let seconds = 15;
-            const countdownEl = document.getElementById('countdown');
-            countdownEl.textContent = seconds;
+    let seconds = 15;
+    isCountdownActive = true;
 
-            countdownTimer = setInterval(() => {
-                seconds--;
-                countdownEl.textContent = seconds;
+    const countdownEl = document.getElementById('countdown');
+    countdownEl.textContent = seconds;
 
-                // Vibrate on each second
-                if (navigator.vibrate) {
-                    navigator.vibrate(100);
-                }
+    countdownTimer = setInterval(() => {
+        if (!isCountdownActive) return;
 
-                if (seconds <= 0) {
-                    clearInterval(countdownTimer);
-                    triggerEmergency();
-                }
-            }, 1000);
+        seconds--;
+        countdownEl.textContent = seconds;
+
+        // Continuous vibration pattern
+        if (navigator.vibrate) {
+            navigator.vibrate([300, 200]);
         }
+
+        if (seconds <= 0) {
+            stopAllAlerts();
+            triggerEmergency();
+        }
+    }, 1000);
+}
+        function stopAllAlerts() {
+    isCountdownActive = false;
+
+    clearInterval(countdownTimer);
+    clearInterval(alarmInterval);
+
+    if (audioContext) {
+        audioContext.close();
+        audioContext = null;
+    }
+
+    // Stop vibration immediately
+    if (navigator.vibrate) {
+        navigator.vibrate(0);
+    }
+
+    document.getElementById('countdownModal').classList.remove('active');
+}
 
         // Cancel Alert
         function cancelAlert() {
-            clearInterval(countdownTimer);
-            accidentDetected = false;
+    accidentDetected = false;
 
-            document.getElementById('countdownModal').classList.remove('active');
+    stopAllAlerts();
 
-            if (isMonitoring) {
-                updateStatus('active', '🛡️', 'Monitoring Active', 'Detection resumed');
-            } else {
-                stopMonitoring();
-            }
-            clearInterval(alarmInterval);
-                if (audioContext) {
-                audioContext.close();
-            }
+    if (isMonitoring) {
+        updateStatus('active', '🛡️', 'Monitoring Active', 'Detection resumed');
+    } else {
+        stopMonitoring();
+    }
 
-            showToast('Alert cancelled', 'success');
-        }
+    showToast('Alert cancelled', 'success');
+}
 
         // Trigger Emergency
         function triggerEmergency() {
-            clearInterval(alarmInterval);
-                if (audioContext) {
-                    audioContext.close();
-                }
             document.getElementById('countdownModal').classList.remove('active');
 
             navigator.geolocation.getCurrentPosition(
